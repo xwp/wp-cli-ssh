@@ -24,22 +24,23 @@ if ( empty( $ssh_config ) ) {
 
 // Parse cli args to push to server
 $has_url       = false;
-$path      		 = null;
+$path          = null;
 $target_server = null;
+$cli_args      = array();
 
-$cli_args = array_slice( $GLOBALS['argv'], 1 );
-
-foreach ( $cli_args as $key => $arg ) {
-	if ( preg_match( '#^--url=#', $arg ) ) {
-		$has_url = true;
+// @todo Better to use WP_CLI::get_configurator()->parse_args() here?
+foreach ( array_slice( $GLOBALS['argv'], 1 ) as $arg ) {
+	if ( preg_match( '#^--ssh-host=(.+)$#', $arg, $matches ) ) {
+		$target_server = $matches[1];
 	}
 	else if ( preg_match( '#^--path=(.+)$#', $arg, $matches ) ) {
 		$path = $matches[1];
-		unset( $cli_args[ $key ] );
 	}
-	else if ( preg_match( '#^--ssh-host=(.+)$#', $arg, $matches ) ) {
-		$target_server = $matches[1];
-		unset( $cli_args[ $key ] );
+	else {
+		if ( preg_match( '#^--url=#', $arg ) ) {
+			$has_url = true;
+		}
+		$cli_args[] = $arg;
 	}
 }
 
