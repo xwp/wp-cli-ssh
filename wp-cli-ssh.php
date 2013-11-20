@@ -93,22 +93,27 @@ $wp_command
 BASH;
 
 // Replace path
-$cmd = sprintf( $cmd, $path );
+$cmd = sprintf( $cmd, escapeshellarg( $path ) );
 
-$cmd = trim( preg_replace( '/\s+/', ' ', $cmd ) );
+// Append WP-CLI args to command
+$cmd  = trim( preg_replace( '/\s+/', ' ', $cmd ) );
 $cmd .= ' ' . join( ' ', array_map( 'escapeshellarg', $cli_args ) );
 
-// Escape command argument for each level of SSH tunnel inception
+// Escape command argument for each level of SSH tunnel inception, and pass along TTY state
+$is_tty       = function_exists( 'posix_isatty' ) && posix_isatty( STDOUT );
 $cmd_prefix   = $ssh_config[$target_server]['cmd'];
+$cmd_prefix   = str_replace( '%pseudotty%', ( $is_tty ? '-t' : '-T' ), $cmd_prefix );
 $tunnel_depth = preg_match_all( '/(^|\s)(ssh|slogin)\s/', $cmd_prefix );
 for ( $i = 0; $i < $tunnel_depth; $i += 1 ) {
 	$cmd = escapeshellarg( $cmd );
 }
 
-//Replace placeholder by command
+// Replace placeholder with command
 $cmd = str_replace( '%cmd%', $cmd, $cmd_prefix );
 
-WP_CLI::log( sprintf( 'Connecting to remote host: %s', $target_server ) );
+if ( ! $is_tty ) { // they probably want this to be --quiet
+	WP_CLI::log( sprintf( 'Connecting to remote host: %s', $target_server ) );
+}
 
 passthru( $cmd, $exit_code );
 
