@@ -162,8 +162,8 @@ call_user_func(
 		// Replace placeholder with command
 		$cmd = str_replace( '%cmd%', $cmd, $cmd_prefix );
 
-		if ( ! $is_tty ) { // they probably want this to be --quiet
-			WP_CLI::log( sprintf( 'Connecting to remote host: %s', $target_server ) );
+		if ( $is_tty ) { // they probably want this to be --quiet
+			WP_CLI::log( sprintf( 'Connecting via ssh to host: %s', $target_server ) );
 		}
 
 		// Execute WP-CLI on remote server
