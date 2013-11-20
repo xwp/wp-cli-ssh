@@ -81,6 +81,17 @@ call_user_func(
 			}
 		}
 
+		// Abort if the WP-CLI config lacks ssh info
+		if ( empty( $ssh_config ) ) {
+			// Prevent: Warning: unknown --ssh-host parameter
+			// We may have a Bash alias in place to provide a global default:
+			// alias wp="wp --ssh-host=vagrant"
+			if ( $target_server ) {
+				unset( $runner->assoc_args['ssh-host'] );
+			}
+			return;
+		}
+
 		// Check if a target is specified or fallback on local if not.
 		if ( $target_server && ! isset( $ssh_config[$target_server] ) ){
 			WP_CLI::error( "The target SSH host you specified doesn't exist in the wp-cli config file." );
