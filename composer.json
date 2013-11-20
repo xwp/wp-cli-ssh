@@ -1,0 +1,28 @@
+{
+	"name": "x-team/wp-cli-ssh",
+	"version": "0.1.0",
+	"description": "Invoke WP-CLI on another server via SSH from local machine",
+	"homepage": "https://github.com/x-team/wp-cli-ssh",
+	"license": "GPLv2",
+	"keywords": ["wp-cli","ssh","remote"],
+	"authors": [
+		{
+			"name": "Jonathan Bardo",
+			"email": "jonathan.bardo@x-team.com",
+			"homepage": "http://www.jonathanbardo.com/",
+			"role": "Developer"
+		},
+		{
+			"name": "Weston Ruter",
+			"email": "weston@x-team.com",
+			"homepage": "http://weston.ruter.net",
+			"role": "Developer"
+		}
+	],
+	"require": {
+		"php": ">=5.4"
+	},
+	"autoload": {
+		"files": [ "wp-cli-ssh.php" ]
+	}
+}
