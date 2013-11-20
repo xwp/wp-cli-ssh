@@ -1,0 +1,44 @@
+url: local.example.com
+path: docroot
+color: auto
+
+ssh:
+
+  staging:
+    # The %pseudotty% placeholder gets replaced with -t or -T depending on whether you're piping output
+    # The %cmd% placeholder is replaced with the originally-invoked WP-CLI command
+    cmd: ssh %pseudotty% util.example.com %cmd%
+
+    # Passed to WP-CLI on the remote server via --url
+    url: staging.example.com
+
+    # We cd to this path on the remote server before running WP-CLI
+    path: /var/www/staging.example.com/current/docroot
+
+    # WP-CLI over SSH will stop if one of these are provided
+    disabled_commands:
+      - db drop
+      - db reset
+      - plugin install
+      - core multisite-convert
+
+  production:
+    # You can connect to a server by tunnelling through another
+    cmd: ssh %pseudotty% util.example.org ssh %pseudotty% prod-util.example.org %cmd%
+
+    url: www.example.com
+    path: /var/www/staging.example.com/current/docroot
+    disabled_commands:
+      - db drop
+      - db reset
+      - plugin install
+      - core multisite-convert
+
+  # The keys here are supplied to `wp` via the --ssh-host argument
+  vagrant:
+    # Note the following command is needed because passing the -t/-T (%pseudotty%)
+    # argument doesn't seem to be recognized by vagrant: vagrant ssh -c %cmd% -- %pseudotty%
+    cmd: vagrant ssh-config > /tmp/vagrant_ssh_config && ssh -q %pseudotty% -F /tmp/vagrant_ssh_config default %cmd%
+
+    # Location on the vagrant machine where this WordPress install is located
+    path: /srv/www/example.com/docroot
