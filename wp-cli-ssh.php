@@ -116,6 +116,7 @@ call_user_func(
 
 		// Inline bash script
 		$cmd = '
+			set -e;
 			if command -v wp >/dev/null 2>&1; then
 				wp_command=wp;
 			else
