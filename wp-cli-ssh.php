@@ -1,7 +1,7 @@
 <?php
 
 /**
- * WP-CLI require that facilitates invoking command on remote instance
+ * Invoke WP-CLI on another server via SSH from local machine
  *
  * @package  wp-cli
  * @author   Jonathan Bardo <jonathan.bardo@x-team.com>
@@ -31,7 +31,7 @@ call_user_func(
 
 		/**
 		 * This script can either be supplied via a WP-CLI --require config, or
-		 * itcan be loaded via a Composer package. In the latter case:
+		 * it can be loaded via a Composer package. In the latter case:
 		 * Bootstrap this file to be required inside of WP_CLI\Runner::before_wp_load()
 		 * so that it will be run even before do_early_invoke, and so that we have
 		 * access to $this and the private variables and methods, such as:
@@ -97,7 +97,7 @@ call_user_func(
 			$runner->config['disabled_commands'] = $ssh_config[$target_server]['disabled_commands'];
 		}
 
-		// Check if command is valid or disabled **from core wp-cli
+		// Check if command is valid or disabled
 		$r = $runner->find_command_to_run( array_values( $cli_args ) );
 		if ( is_string( $r ) ) {
 			WP_CLI::error( $r );
@@ -155,8 +155,10 @@ call_user_func(
 			WP_CLI::log( sprintf( 'Connecting to remote host: %s', $target_server ) );
 		}
 
+		// Execute WP-CLI on remote server
 		passthru( $cmd, $exit_code );
 
+		// Prevent local machine's WP-CLI from executing further
 		exit( $exit_code );
 
 	},
