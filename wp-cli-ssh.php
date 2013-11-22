@@ -26,19 +26,35 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-call_user_func(
-	function( $runner ) {
+/**
+ * Implements ssh command.
+ */
+class SSH extends WP_CLI_Command {
+
+	private $global_config_path, $project_config_path;
+
+	/**
+	 * Forward command to remote host
+	 *
+	 * @when before_wp_load
+	 */
+	public function __invoke( $args, $assoc_args ) {
+		$runner = WP_CLI::get_runner();
+
+		// Temporary solution to reflect code in core by setting private method public
+		// Yes this is hacky and not an ideal solution
+		$reflector = new ReflectionClass( get_class($runner) );
+		$reflected_runner = $reflector->newInstance();
+
+		$command_to_run = $reflector->getMethod('find_command_to_run');
+		$command_to_run->setAccessible(true);
+		$runner_config = $reflector->getProperty('config');
+		$runner_config->setAccessible(true);
+		$runner_config->setValue( $reflected_runner, $runner->config );
 
 		/**
 		 * This script can either be supplied via a WP-CLI --require config, or
-		 * it can be loaded via a Composer package. In the latter case:
-		 * Bootstrap this file to be required inside of WP_CLI\Runner::before_wp_load()
-		 * so that it will be run even before do_early_invoke, and so that we have
-		 * access to $this and the private variables and methods, such as:
-		 * - WP_CLI\Runner::find_command_to_run()
-		 * - WP_CLI\Runner::$config
-		 * - WP_CLI\Runner::$global_config_path
-		 * - WP_CLI\Runner::$project_config_path
+		 * it can be loaded via a Composer package.
 		 * YES, the result is that this file is required twice. YES, this is hacky!
 		 */
 		$require_arg = sprintf( '--require=%s', __FILE__ );
@@ -52,7 +68,7 @@ call_user_func(
 		 */
 		$ssh_config = array();
 		foreach ( array( $runner->global_config_path, $runner->project_config_path ) as $config_path ) {
-			$config = self::load_config( $config_path );
+			$config = spyc_load_file( $config_path );
 			if ( ! empty( $config['ssh'] ) ) {
 				$ssh_config = array_merge( $ssh_config, $config['ssh'] );
 			}
@@ -65,11 +81,11 @@ call_user_func(
 		$cli_args      = array();
 
 		// @todo Better to use WP_CLI::get_configurator()->parse_args() here?
-		foreach ( array_slice( $GLOBALS['argv'], 1 ) as $arg ) {
+		foreach ( array_slice( $GLOBALS['argv'], 2 ) as $arg ) {
 			// Remove what we added above the first time this file was loaded
 			if ( $arg === $require_arg ) {
 				continue;
-			} else if ( preg_match( '#^--ssh-host=(.+)$#', $arg, $matches ) ) {
+			} else if ( preg_match( '#^--host=(.+)$#', $arg, $matches ) ) {
 				$target_server = $matches[1];
 			} else if ( preg_match( '#^--path=(.+)$#', $arg, $matches ) ) {
 				$path = $matches[1];
@@ -79,17 +95,6 @@ call_user_func(
 				}
 				$cli_args[] = $arg;
 			}
-		}
-
-		// Abort if the WP-CLI config lacks ssh info
-		if ( empty( $ssh_config ) ) {
-			// Prevent: Warning: unknown --ssh-host parameter
-			// We may have a Bash alias in place to provide a global default:
-			// alias wp="wp --ssh-host=vagrant"
-			if ( $target_server ) {
-				unset( $runner->assoc_args['ssh-host'] );
-			}
-			return;
 		}
 
 		// Check if a target is specified or fallback on local if not.
@@ -105,11 +110,11 @@ call_user_func(
 		// Check if the currently runned command is disabled on remote server
 		// Also check if we have a valid command
 		if ( isset( $ssh_config[$target_server]['disabled_commands'] ) ){
-			$runner->config['disabled_commands'] = $ssh_config[$target_server]['disabled_commands'];
+			$runner_config->setValue( $reflected_runner, array( 'disabled_commands' => $ssh_config[$target_server]['disabled_commands'] ));
 		}
 
 		// Check if command is valid or disabled
-		$r = $runner->find_command_to_run( array_values( $cli_args ) );
+		$r = $command_to_run->invoke( $reflected_runner, array_values( $cli_args ) );
 		if ( is_string( $r ) ) {
 			WP_CLI::error( $r );
 		}
@@ -171,7 +176,7 @@ call_user_func(
 
 		// Prevent local machine's WP-CLI from executing further
 		exit( $exit_code );
+	}
+}
 
-	},
-	empty( $this ) ? null : $this
-); // Hi, JavaScript!
+WP_CLI::add_command( 'ssh', 'SSH' );
