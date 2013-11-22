@@ -48,6 +48,8 @@ class SSH extends WP_CLI_Command {
 
 		$command_to_run = $reflector->getMethod('find_command_to_run');
 		$command_to_run->setAccessible(true);
+		$load_config = $reflector->getMethod('load_config');
+		$load_config->setAccessible(true);
 		$runner_config = $reflector->getProperty('config');
 		$runner_config->setAccessible(true);
 		$runner_config->setValue( $reflected_runner, $runner->config );
@@ -68,7 +70,7 @@ class SSH extends WP_CLI_Command {
 		 */
 		$ssh_config = array();
 		foreach ( array( $runner->global_config_path, $runner->project_config_path ) as $config_path ) {
-			$config = spyc_load_file( $config_path );
+			$config = $load_config->invoke( $reflected_runner, $config_path );
 			if ( ! empty( $config['ssh'] ) ) {
 				$ssh_config = array_merge( $ssh_config, $config['ssh'] );
 			}
