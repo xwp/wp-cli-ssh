@@ -29,7 +29,7 @@
 /**
  * Implements ssh command.
  */
-class SSH extends WP_CLI_Command {
+class WP_CLI_SSH_Command extends WP_CLI_Command {
 
 	private $global_config_path, $project_config_path;
 
@@ -181,4 +181,4 @@ class SSH extends WP_CLI_Command {
 	}
 }
 
-WP_CLI::add_command( 'ssh', 'SSH' );
+WP_CLI::add_command( 'ssh', 'WP_CLI_SSH_Command' );
