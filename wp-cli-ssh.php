@@ -1,5 +1,4 @@
 <?php
-
 /**
  * Invoke WP-CLI on another server via SSH from local machine
  *
@@ -41,19 +40,6 @@ class WP_CLI_SSH_Command extends WP_CLI_Command {
 	public function __invoke( $args, $assoc_args ) {
 		$runner = WP_CLI::get_runner();
 
-		// Temporary solution to reflect code in core by setting private method public
-		// Yes this is hacky and not an ideal solution
-		$reflector = new ReflectionClass( get_class($runner) );
-		$reflected_runner = $reflector->newInstance();
-
-		$command_to_run = $reflector->getMethod('find_command_to_run');
-		$command_to_run->setAccessible(true);
-		$load_config = $reflector->getMethod('load_config');
-		$load_config->setAccessible(true);
-		$runner_config = $reflector->getProperty('config');
-		$runner_config->setAccessible(true);
-		$runner_config->setValue( $reflected_runner, $runner->config );
-
 		/**
 		 * This script can either be supplied via a WP-CLI --require config, or
 		 * it can be loaded via a Composer package.
@@ -63,17 +49,6 @@ class WP_CLI_SSH_Command extends WP_CLI_Command {
 		if ( empty( $runner ) ) {
 			$GLOBALS['argv'][] = $require_arg;
 			return;
-		}
-
-		/**
-		 * Gather SSH config from global and project-specific config files
-		 */
-		$ssh_config = array();
-		foreach ( array( $runner->global_config_path, $runner->project_config_path ) as $config_path ) {
-			$config = $load_config->invoke( $reflected_runner, $config_path );
-			if ( ! empty( $config['ssh'] ) ) {
-				$ssh_config = array_merge( $ssh_config, $config['ssh'] );
-			}
 		}
 
 		// Parse cli args to push to server
@@ -99,35 +74,29 @@ class WP_CLI_SSH_Command extends WP_CLI_Command {
 			}
 		}
 
-		// Check if a target is specified or fallback on local if not.
-		if ( $target_server && ! isset( $ssh_config[$target_server] ) ){
-			WP_CLI::error( "The target SSH host you specified doesn't exist in the wp-cli config file." );
-		} else if ( ! $target_server ) {
-			return;
+		// Remove duplicated ssh when there is a forgotten `alias wp="wp ssh --host=vagrant"`
+		while ( ! empty( $cli_args ) && $cli_args[0] === 'ssh' ) {
+			array_shift( $cli_args );
 		}
 
-		// Revert back to default host if not explicitly specified
-		$target_server = ( $target_server ) ?: $ssh_config['default'];
-
-		// Check if the currently runned command is disabled on remote server
-		// Also check if we have a valid command
-		if ( isset( $ssh_config[$target_server]['disabled_commands'] ) ){
-			$runner_config->setValue( $reflected_runner, array( 'disabled_commands' => $ssh_config[$target_server]['disabled_commands'] ));
+		// Check if a target is specified or fallback on local if not.
+		if ( ! isset( $assoc_args[$target_server] ) ){
+			WP_CLI::error( "The target SSH host you specified doesn't exist in the wp-cli config file." );
+		} else {
+			$ssh_config = $assoc_args[$target_server];
 		}
 
 		// Check if command is valid or disabled
-		$r = $command_to_run->invoke( $reflected_runner, array_values( $cli_args ) );
-		if ( is_string( $r ) ) {
-			WP_CLI::error( $r );
-		}
+		// Will output an error if the command has been disabled
+		$r = $this->check_disabled_commands( array_values( $cli_args ), $ssh_config );
 
 		// Add default url from config is one is not set
-		if ( ! $has_url && ! empty( $ssh_config[$target_server]['url'] ) ) {
-			$cli_args[] = '--url=' . $ssh_config[$target_server]['url'];
+		if ( ! $has_url && ! empty( $ssh_config['url'] ) ) {
+			$cli_args[] = '--url=' . $ssh_config['url'];
 		}
 
-		if ( ! $path && ! empty( $ssh_config[$target_server]['path'] ) ) {
-			$path = $ssh_config[$target_server]['path'];
+		if ( ! $path && ! empty( $ssh_config['path'] ) ) {
+			$path = $ssh_config['path'];
 		} else {
 			WP_CLI::error( 'No path is specified' );
 		}
@@ -159,7 +128,7 @@ class WP_CLI_SSH_Command extends WP_CLI_Command {
 
 		// Escape command argument for each level of SSH tunnel inception, and pass along TTY state
 		$is_tty       = function_exists( 'posix_isatty' ) && posix_isatty( STDOUT );
-		$cmd_prefix   = $ssh_config[$target_server]['cmd'];
+		$cmd_prefix   = $ssh_config['cmd'];
 		$cmd_prefix   = str_replace( '%pseudotty%', ( $is_tty ? '-t' : '-T' ), $cmd_prefix );
 		$tunnel_depth = preg_match_all( '/(^|\s)(ssh|slogin)\s/', $cmd_prefix );
 		for ( $i = 0; $i < $tunnel_depth; $i += 1 ) {
@@ -179,6 +148,42 @@ class WP_CLI_SSH_Command extends WP_CLI_Command {
 		// Prevent local machine's WP-CLI from executing further
 		exit( $exit_code );
 	}
+
+	/**
+	 * Check if the command run is disabled on local config
+	 *
+	 * @param array $args
+	 * @param array $ssh_config
+	 * 
+	 * @return void|error
+	 */
+	private function check_disabled_commands( $args, $ssh_config ) {
+		// Check if the currently runned command is disabled on remote server
+		// Also check if we have a valid command
+		if ( ! isset( $ssh_config['disabled_commands'] ) ) {
+			return;
+		} else {
+			$disabled_commands = $ssh_config['disabled_commands'];
+		}
+
+		$cmd_path = array();
+
+		while ( ! empty( $args ) ) {
+			$cmd_path[] = array_shift($args);
+			$full_name = implode( ' ', $cmd_path );
+
+			// We don't check if the command exist as we might have community package installed on remote server an not local
+			if ( in_array( $full_name, $disabled_commands ) ) {
+				WP_CLI::error(
+					sprintf(
+						"The '%s' command has been disabled from the config file.",
+						$full_name
+					)
+				);
+			}
+		}
+	}
+
 }
 
 WP_CLI::add_command( 'ssh', 'WP_CLI_SSH_Command' );
