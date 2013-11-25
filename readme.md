@@ -21,14 +21,14 @@ Then you just invoke WP-CLI normally, but supply an additional `--ssh-host` argu
 host you want to connect to:
 
 ```bash
-wp plugin status --ssh-host=production
+wp ssh plugin status --host=production
 ```
 
 You can also provide Bash aliases to supply this argument by default:
 
 ```bash
-alias wp="wp --ssh-host=vagrant"
-alias wpprod="wp --ssh-host=production"
+alias wp="wp ssh --host=vagrant"
+alias wpprod="wp ssh --host=production"
 ```
 
 Add an `ssh` section to your `wp-cli.yml`/`wp-cli.local.yml`, as seen in the [sample config](wp-cli.sample.yml).
