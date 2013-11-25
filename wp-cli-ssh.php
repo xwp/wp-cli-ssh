@@ -74,6 +74,11 @@ class WP_CLI_SSH_Command extends WP_CLI_Command {
 			}
 		}
 
+		// Remove duplicated ssh when there is a forgotten `alias wp="wp ssh --host=vagrant"`
+		while ( ! empty( $cli_args ) && $cli_args[0] === 'ssh' ) {
+			array_shift( $cli_args );
+		}
+
 		// Check if a target is specified or fallback on local if not.
 		if ( ! isset( $assoc_args[$target_server] ) ){
 			WP_CLI::error( "The target SSH host you specified doesn't exist in the wp-cli config file." );
