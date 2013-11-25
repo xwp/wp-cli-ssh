@@ -17,7 +17,7 @@ command to another program, it will return the machine-formatted output (e.g. no
 Assuming you have a clone of your WordPress install on your machine, add an `ssh` section
 to your `wp-cli.yml` config file. In this section you define the remote servers which 
 host the other environments for your site, e.g. `vagrant`, `staging`, and `production`. 
-Then you just invoke WP-CLI normally, but supply an additional `--ssh-host` argument with
+Then you just invoke WP-CLI normally, but supply an additional `--host` argument with
 host you want to connect to:
 
 ```bash
@@ -41,7 +41,7 @@ with `-t`/`-T` depending on whether you're on a TTY or piping the command output
 Note that you do not necessarily need WP-CLI installed on your server to use this. If the `wp` command is not
 recognized on the server, the script will download the `wp-cli.phar` file and use that at runtime.
 
-Installing WP-CLI-SSH on your machine can be done either by installation as a Composer package (further details TBD),
+Installing WP-CLI-SSH on your machine can be done either by installation as a Composer package,
 or by adding a `require` config to a `wp-cli.local.yml`.
 
 ## Alternatives
