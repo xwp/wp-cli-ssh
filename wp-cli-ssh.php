@@ -82,7 +82,8 @@ class WP_CLI_SSH_Command extends WP_CLI_Command {
 		// Check if a target is specified or fallback on local if not.
 		if ( ! isset( $assoc_args[$target_server] ) ){
 			// Run local wp cli command
-			passthru( 'wp ' . implode( ' ', $cli_args ), $exit_code );
+			$cmd = sprintf( '%s %s %s', PHP_BINARY, $GLOBALS['argv'][0], implode( ' ', $cli_args ) );
+			passthru( $cmd, $exit_code );
 			exit( $exit_code );
 		} else {
 			$ssh_config = $assoc_args[$target_server];
