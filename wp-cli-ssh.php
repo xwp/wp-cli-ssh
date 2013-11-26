@@ -81,7 +81,9 @@ class WP_CLI_SSH_Command extends WP_CLI_Command {
 
 		// Check if a target is specified or fallback on local if not.
 		if ( ! isset( $assoc_args[$target_server] ) ){
-			WP_CLI::error( "The target SSH host you specified doesn't exist in the wp-cli config file." );
+			// Run local wp cli command
+			passthru( 'wp ' . implode( ' ', $args ), $exit_code );
+			exit( $exit_code );
 		} else {
 			$ssh_config = $assoc_args[$target_server];
 		}
