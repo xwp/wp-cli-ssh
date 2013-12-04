@@ -36,6 +36,8 @@ You indicate the `ssh` command templates for each host you want to connect to. T
 replaced with the full command to run on the server; the `%pseudotty%` template variable is replaced 
 with `-t`/`-T` depending on whether you're on a TTY or piping the command output.
 
+For a step-by-step guide, please refer to the [wiki](https://github.com/x-team/wp-cli-ssh/wiki/Configuring-the-plugin).
+
 ## Installation
 
 Note that you do not necessarily need WP-CLI installed on your server to use this. If the `wp` command is not
