@@ -26,6 +26,13 @@
  */
 
 /**
+ * Bail if not a WP-CLI request
+ */
+if ( ! defined( 'WP_CLI_ROOT' ) ) {
+        return;
+}
+
+/**
  * Implements ssh command.
  */
 class WP_CLI_SSH_Command extends WP_CLI_Command {
