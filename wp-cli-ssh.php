@@ -28,7 +28,7 @@
 /**
  * Bail if not a WP-CLI request
  */
-if ( ! defined( 'WP_CLI_ROOT' ) ) {
+if ( ! defined( 'WP_CLI' ) ) {
         return;
 }
 
