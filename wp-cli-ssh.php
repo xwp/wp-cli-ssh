@@ -42,6 +42,18 @@ class WP_CLI_SSH_Command extends WP_CLI_Command {
 	/**
 	 * Forward command to remote host
 	 *
+	 * ## OPTIONS
+	 *
+	 * <command>
+	 * : The subcommand to run.
+	 *
+	 * --host=<host>
+	 * : name of the host to connect to
+	 *
+	 * ## EXAMPLES
+	 *
+	 *     wp ssh plugin status --host=vagrant
+	 *
 	 * @when before_wp_load
 	 */
 	public function __invoke( $args, $assoc_args ) {
@@ -165,7 +177,7 @@ class WP_CLI_SSH_Command extends WP_CLI_Command {
 	 *
 	 * @param array $args
 	 * @param array $ssh_config
-	 * 
+	 *
 	 * @return void|error
 	 */
 	private function check_disabled_commands( $args, $ssh_config ) {
