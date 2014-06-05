@@ -44,11 +44,8 @@ class WP_CLI_SSH_Command extends WP_CLI_Command {
 	 *
 	 * ## OPTIONS
 	 *
-	 * <command>
+	 * <command>...
 	 * : The command to run.
-	 *
-	 * [<subcommand>]...
-	 * : The subcommand to run.
 	 *
 	 * --host=<host>
 	 * : name of the host to connect to
