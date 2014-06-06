@@ -44,8 +44,8 @@ class WP_CLI_SSH_Command extends WP_CLI_Command {
 	 *
 	 * ## OPTIONS
 	 *
-	 * <command>
-	 * : The subcommand to run.
+	 * <command>...
+	 * : The command to run.
 	 *
 	 * --host=<host>
 	 * : name of the host to connect to
@@ -192,7 +192,7 @@ class WP_CLI_SSH_Command extends WP_CLI_Command {
 		$cmd_path = array();
 
 		while ( ! empty( $args ) ) {
-			$cmd_path[] = array_shift($args);
+			$cmd_path[] = array_shift( $args );
 			$full_name = implode( ' ', $cmd_path );
 
 			// We don't check if the command exist as we might have community package installed on remote server an not local
