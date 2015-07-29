@@ -46,6 +46,11 @@ recognized on the server, the script will download the `wp-cli.phar` file and us
 Installing WP-CLI-SSH on your machine can be done either by installation as a Composer package,
 or by adding a `require` config to a `wp-cli.local.yml`.
 
+For global composer installation:
+```bash
+composer global require x-team/wp-cli-ssh dev-master
+```
+
 ## Alternatives
 
  * [vassh](https://github.com/x-team/vassh)
