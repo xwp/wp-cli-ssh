@@ -135,7 +135,7 @@ class WP_CLI_SSH_Command extends WP_CLI_Command {
 		$cmd = '
 			set -e;
 			if command -v wp >/dev/null 2>&1; then
-				wp_command=wp;
+				wp_command=$(command -v wp);
 			else
 				wp_command=/tmp/wp-cli.phar;
 				if [ ! -e $wp_command ]; then
@@ -144,8 +144,13 @@ class WP_CLI_SSH_Command extends WP_CLI_Command {
 				fi;
 			fi;
 			cd %s;
-			$wp_command
 		';
+
+    if ( isset( $ssh_config['php_interpreter'] ) ) {
+			$cmd .= escapeshellcmd( $ssh_config['php_interpreter'] ) . ' ';
+		}
+
+		$cmd .= '$wp_command';
 
 		// Replace path
 		$cmd = sprintf( $cmd, escapeshellarg( $path ) );
