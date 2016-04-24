@@ -107,6 +107,7 @@ class WP_CLI_SSH_Command extends WP_CLI_Command {
 		// Check if a target is specified or fallback on local if not.
 		if ( ! isset( $assoc_args[$target_server] ) ){
 			// Run local wp cli command
+			WP_CLI::log( "Target host '" . $target_server . "' is not configured. Falling back on localhost." );
 			$php_bin = defined( 'PHP_BINARY' ) ? PHP_BINARY : getenv( 'WP_CLI_PHP_USED' );
 			$cmd = sprintf( '%s %s %s', $php_bin, $GLOBALS['argv'][0], implode( ' ', $cli_args ) );
 			passthru( $cmd, $exit_code );
