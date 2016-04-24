@@ -146,7 +146,7 @@ class WP_CLI_SSH_Command extends WP_CLI_Command {
 			cd %s;
 		';
 
-    if ( isset( $ssh_config['php_interpreter'] ) ) {
+		if ( isset( $ssh_config['php_interpreter'] ) ) {
 			$cmd .= escapeshellcmd( $ssh_config['php_interpreter'] ) . ' ';
 		}
 
