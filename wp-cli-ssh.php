@@ -131,9 +131,12 @@ class WP_CLI_SSH_Command extends WP_CLI_Command {
 			WP_CLI::error( 'No path is specified' );
 		}
 
-		// Inline bash script
-		$cmd = '
-			set -e;
+		$cmd = 'set -e;';
+		if( isset( $ssh_config['wpcli_binary_path'] ) ) {
+			$cmd .= 'wp_command=' . escapeshellcmd( $ssh_config['wpcli_binary_path'] ) . ';';
+		} else {
+			// Inline bash script to detect or download wp-cli
+			$cmd .= '
 			if command -v wp >/dev/null 2>&1; then
 				wp_command=$(command -v wp);
 			else
@@ -143,20 +146,17 @@ class WP_CLI_SSH_Command extends WP_CLI_Command {
 					chmod +x $wp_command;
 				fi;
 			fi;
-			cd %s;
-		';
+			';
 
-		if ( isset( $ssh_config['php_interpreter'] ) ) {
-			$cmd .= escapeshellcmd( $ssh_config['php_interpreter'] ) . ' ';
+			// Remove newlines in Bash script added just for readability
+			$cmd = trim( preg_replace( '/\s+/', ' ', $cmd ) );
 		}
 
+		// Change directory to value specified by path config variable
+		$cmd .= 'cd ' . escapeshellarg( $path ) . ';';
+
+		// This one gets executed
 		$cmd .= '$wp_command';
-
-		// Replace path
-		$cmd = sprintf( $cmd, escapeshellarg( $path ) );
-
-		// Remove newlines in Bash script added just for readability
-		$cmd  = trim( preg_replace( '/\s+/', ' ', $cmd ) );
 
 		// Append WP-CLI args to command
 		$cmd .= ' ' . join( ' ', array_map( 'escapeshellarg', $cli_args ) );

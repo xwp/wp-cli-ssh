@@ -15,8 +15,8 @@ ssh:
     # We cd to this path on the remote server before running WP-CLI
     path: /var/www/staging.example.com/current/docroot
 
-    # Use a custom php interpreter on the remote server
-    php_interpreter: php
+    # Use a custom php interpreter / wp-cli command on the remote server
+    wpcli_binary_path: php ./vendor/bin/wp
 
     # WP-CLI over SSH will stop if one of these are provided
     disabled_commands:
