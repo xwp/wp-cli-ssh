@@ -138,7 +138,7 @@ class WP_CLI_SSH_Command extends WP_CLI_Command {
 			// Inline bash script to detect or download wp-cli
 			$cmd .= '
 			if command -v wp >/dev/null 2>&1; then
-				wp_command=$(command -v wp);
+				wp_command=wp;
 			else
 				wp_command=/tmp/wp-cli.phar;
 				if [ ! -e $wp_command ]; then
