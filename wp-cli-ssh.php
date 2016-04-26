@@ -132,8 +132,8 @@ class WP_CLI_SSH_Command extends WP_CLI_Command {
 		}
 
 		$cmd = 'set -e;';
-		if( isset( $ssh_config['wpcli_binary_path'] ) ) {
-			$cmd .= 'wp_command=' . escapeshellcmd( $ssh_config['wpcli_binary_path'] ) . ';';
+		if( isset( $ssh_config['wpcli_command'] ) ) {
+			$cmd .= 'wp_command=' . escapeshellcmd( $ssh_config['wpcli_command'] ) . ';';
 		} else {
 			// Inline bash script to detect or download wp-cli
 			$cmd .= '
