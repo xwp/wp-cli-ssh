@@ -140,13 +140,21 @@ class WP_CLI_SSH_Command extends WP_CLI_Command {
 			if command -v wp >/dev/null 2>&1; then
 				wp_command=wp;
 			else
-				wp_command=/tmp/wp-cli.phar;
+				wp_command=%tmp_directory%/wp-cli.phar;
 				if [ ! -e $wp_command ]; then
 					curl -L https://github.com/wp-cli/builds/blob/gh-pages/phar/wp-cli.phar?raw=true > $wp_command;
 					chmod +x $wp_command;
 				fi;
 			fi;
 			';
+
+			if ( isset( $ssh_config['tmp_directory'] ) ) {
+				$tmp_directory = $ssh_config['tmp_directory'];
+			} else {
+				$tmp_directory = '/tmp';
+			}
+
+			$cmd = str_replace( '%tmp_directory%', $tmp_directory, $cmd );
 
 			// Remove newlines in Bash script added just for readability
 			$cmd = trim( preg_replace( '/\s+/', ' ', $cmd ) );
