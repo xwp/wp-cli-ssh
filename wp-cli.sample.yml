@@ -18,6 +18,9 @@ ssh:
     # Temporary directory to install wp-cli.phar to when it's not available. Default is /tmp
     tmp_directory: /tmp
 
+    # Use a custom php interpreter / wp-cli command on the remote server
+    wpcli_command: php ./vendor/bin/wp
+
     # WP-CLI over SSH will stop if one of these are provided
     disabled_commands:
       - db drop
