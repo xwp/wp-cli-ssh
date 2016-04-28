@@ -154,7 +154,7 @@ class WP_CLI_SSH_Command extends WP_CLI_Command {
 				$tmp_directory = '/tmp';
 			}
 
-			str_replace( '%tmp_directory%', $tmp_directory, $cmd );
+			$cmd = str_replace( '%tmp_directory%', $tmp_directory, $cmd );
 
 			// Remove newlines in Bash script added just for readability
 			$cmd = trim( preg_replace( '/\s+/', ' ', $cmd ) );
