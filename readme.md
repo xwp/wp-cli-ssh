@@ -1,3 +1,5 @@
+*DEPRECATED*: This feature will soon be released as part of WP-CLI itself. See [wp-cli#2754](https://github.com/wp-cli/wp-cli/issues/2754).
+
 # WP-CLI SSH
 *Seamlessly run WP-CLI commands on a remote server via SSH*
 
